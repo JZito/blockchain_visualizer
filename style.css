@@ -1,0 +1,252 @@
+html, body, canvas {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  width:100%;
+  height:100%;
+}
+
+body {
+  background-color: #333333;
+  overflow: hidden;
+  color:#EEEEEE;
+  font-family: 'Lato', sans-serif;
+  font-size: 11px;
+}
+
+canvas {
+  position: absolute;
+  top:0;
+  left:0;
+  pointer-events:auto;
+}
+
+#title { position: absolute;
+  left: 20px;
+  top: 20px;
+  right: 20px;
+  line-height: 1.1em;
+  /*text-shadow: 0 1px 0 rgba(0,0,0,.4);*/
+}
+
+#right{
+  position: absolute;
+  text-align:right;
+  left: 0;
+  top: 0;
+}
+
+#right p, #right h4 {
+  text-align: left;
+}
+
+/*#right a {
+  color: white;
+  opacity: .75;
+  transition: opacity 150ms ease-out;
+  padding: 10px 20px;
+  border: 1px solid white;
+  line-height: 45px;
+}
+*/
+#right a:hover,
+#close-button {
+  text-decoration: none;
+}
+
+/*#logo {
+  left: 0;
+  top: 0;
+  width: 177px;
+  height: 100px;
+  background-image: url("https://s3-us-west-2.amazonaws.com/bitbonkers/logo.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+}*/
+
+#address-img {
+  width: 200px;
+  height: 200px;
+  /*background-image: url("../images/qr.png");*/
+  background-image: url("qr_donation_wallet.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+  margin: 0 auto;
+}
+
+#play_button {
+  position: fixed;
+  width: 256px;
+  height: 256px;
+  z-index: 15;
+  top: 50%;
+  left: 50%;
+  margin: -128px 0 0 -128px;
+  background-image: url("play_button.png");
+}
+
+/*#key {
+  width:200px;
+}*/
+
+/*.address {
+  text-transform: none!important;
+}*/
+
+#app-viewport {
+  position: relative;
+  height:100%;
+  width:100%;
+  overflow: hidden;
+}
+
+#info {
+  position: absolute;
+  top:0;
+  left:0;
+  box-sizing: border-box;
+  z-index: 1002;
+  height:100%;
+  width:100%;
+  background-color: rgba(0,0,0,.5);
+  pointer-events: auto;
+}
+
+#content{
+  -webkit-align-items: left;
+  -ms-flex-align: left;
+  align-items: left;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-flow: column;
+  -ms-flex-flow: column;
+  flex-flow: column;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+
+  height:100%;
+  width:100%;
+}
+
+#address-info {
+  position: absolute;
+  top:0;
+  left:0;
+  box-sizing: border-box;
+  z-index: 1003;
+  height:100%;
+  width:100%;
+  background-color: rgba(0,0,0,.9);
+  pointer-events: auto;
+  padding:4vh;
+  text-align: center;
+}
+
+#address-page{
+  -webkit-align-items: left;
+  -ms-flex-align: left;
+  align-items: left;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-flow: column;
+  -ms-flex-flow: column;
+  flex-flow: column;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+
+  height:100%;
+  width:100%;
+}
+
+.hidden {
+  display:none!important;
+  pointer-events: none;
+}
+
+h1,h2,h3,h4,h5,h6,p,a{
+  text-align: left;
+  text-transform: uppercase;
+  text-decoration:none;
+  padding:0;
+  margin:0.5vh 0 0.5vh 0;
+  font-weight: 300;
+}
+
+h1{font-weight: 900;}
+a { color: #fff; text-decoration: none;}
+a, a:hover, a:visited, a:active{color: #fff}
+a:hover{text-decoration:underline;}
+/*
+#info-button { padding: 10px 20px; border: 1px solid white; line-height: 60px; margin-left:20px;}
+#mute-button { padding: 10px 20px; border: 1px solid white; line-height: 60px; margin-left:20px; }*/
+#close-button { padding: 10px 20px; border: 1px solid white; line-height: 60px; }
+#close-address-button { padding: 10px 20px; border: 1px solid white; line-height: 60px; }
+.center{text-align: center;}
+
+@media screen
+  and (orientation : landscape) {
+  #content h1{font-size: 2.5vw;}
+  #content p{font-size: 1.35vw;}
+  #content{
+    width:68vw;
+    margin:auto;
+  }
+}
+
+@media screen
+  and (orientation : landscape)
+  and (min-width : 1200px){
+  #content h1{font-size: 2.4em;}
+  #content p{font-size: 1.5em;}
+  #content{
+    width:816px;
+    margin:auto;
+  }
+}
+
+@media screen
+  and (orientation : landscape)
+  and (max-height : 600px){
+  #content h1{font-size: 4.4vh;}
+  #content p{font-size: 2.7vh;}
+  #content{
+    width:136vh;
+    margin:auto;
+  }
+}
+
+@media screen
+  and (orientation : landscape)
+  and (max-height : 600px){
+  #content h1{font-size: 4.4vh;}
+  #content p{font-size: 2.7vh;}
+  #content{
+    width:136vh;
+    margin:auto;
+  }
+}
+
+@media screen and (orientation : portrait) {
+  #content h1{font-size: 2.2vh;}
+  #content p{font-size: 1.5vh;}
+  #info{
+    padding:8vh;
+  }
+}
+
+@media screen and (orientation : portrait)
+and (max-width : 640px){
+  #info{
+    padding:4vh;
+  }
+}
+
+#noButton{
+  padding: 0!important;
+  border: none!important;
+  line-height: 12px!important;
+}

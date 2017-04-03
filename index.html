@@ -1,0 +1,99 @@
+
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>ETHER DREAM</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<link rel="stylesheet" href="style.css">
+		<script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+		<script src="three.min.js"></script>
+		<script src="Tone.js"></script>
+    <script src="StartAudioContext.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/16.3.5/Tween.min.js"></script>
+		<script src="js/shaders/ConvolutionShader.js"></script>
+    	<!--<script src="js/CSS3DRenderer.js"></script>-->
+		<script src="js/shaders/CopyShader.js"></script>
+		
+		<script src="js/shaders/FilmShader.js"></script>
+
+
+  	<script src="js/postprocessing/EffectComposer.js"></script>
+
+  	<script src="js/postprocessing/RenderPass.js"></script>
+  	<script src="js/postprocessing/BloomPass.js"></script>
+  	<script src="js/postprocessing/FilmPass.js"></script>
+  		
+  	<script src="js/postprocessing/ShaderPass.js"></script>
+
+    <script src="js/postprocessing/TexturePass.js"></script>
+  	<script src="js/postprocessing/MaskPass.js"></script>
+  	<script src="js/postprocessing/DotScreenPass.js"></script>
+
+  	<script src="js/shaders/BleachBypassShader.js"></script>
+    <script src="js/shaders/ColorifyShader.js"></script>
+    <script src="js/shaders/HorizontalBlurShader.js"></script>
+    <script src="js/shaders/SepiaShader.js"></script>
+    <script src="js/shaders/MirrorShader.js"></script>
+    <script src="js/shaders/VerticalBlurShader.js"></script>
+    <script src="js/shaders/VignetteShader.js"></script>
+  	<script src ="script.js"></script>
+	</head>
+
+<body>
+  <div id="app-viewport">
+    <canvas id="canvas"></canvas>
+
+    <div id="info" class="hidden">
+      <div id="content">
+        <h1>A musical interpretation of live transactions on the Ethereum blockchain.</h1>
+        <br />
+        <p class="address">Transactions sent to this address make something beautiful happen: <a href="#" class="address-button"><strong class="address">0xE6B1471020BD32E1Ad024771Ba4bEc405bc917f8</strong></a></p><br />
+        <p class="address">A product of <a href="http://artificialnature.io"><u>Artificial Nature</u></a>.</p>
+        <br />
+        <p class="address"><a href="http://www.github.com/jzito/blockchain-visualizer">github</a></p><br/>
+        <p><a href="#" id="close-button">CLOSE</a></p>
+      </div>
+    </div>
+
+    <div id="title">
+      <div id="logo"></div>
+      <div id="right">
+        <p id ="currentTransaction"><a href="index.html#" id="info-button"><u>ETHER DREAM</u></a></p>
+        <p id="currentBlock">Block: </p>
+        <p id = "currentAmount">Amount: </p>
+      </div>
+    </div>
+
+    <div id="play_button" class="play_button">
+    </div>
+
+
+    <div id="address-info" class="hidden">
+      <div id="address-content">
+        <span>
+          <div id="address-img"></div>
+          <br />
+          <p class="center address">0xE6B1471020BD32E1Ad024771Ba4bEc405bc917f8</p>
+          <br />
+          <p class="center"><a href="#" id="close-address-button">CLOSE</a></p>
+        </span>
+      </div>
+    </div>
+
+  </div>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-96628810-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+</body>
+</html>
+
+</html>
