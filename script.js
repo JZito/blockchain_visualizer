@@ -1,17 +1,17 @@
-var scene, camera, renderer,  composer;
+var scene, camera, renderer, composer;
 var geometry, material, mesh;
 var started = false;
 var sphere;
-var priorBlockID;
-var currentMelody = [];
-var unusedPositions = [];
-var beatLengths = ["1n", "1n", "2n", "4n", "2n", "4n", "4n", "8n"];
-var collectedBlocks = [];
-var currentColors = [];
-var lastBlockPlayed;
+var prior_block_id;
+// var current_melody = [];
+// var unused_positions = [];
+var beat_lengths = ["1n", "1n", "2n", "4n", "2n", "4n", "4n", "8n"];
+var collected_blocks = [];
+var current_colors = [];
+var last_block_played;
 var mute = false;
 var clock = new THREE.Clock();
-var specialColors = ["0xff1744", "0xf50057", "0xd500f9", "0xff3d00"];
+var special_colors = ["0xff1744", "0xf50057", "0xd500f9", "0xff3d00"];
 var notes = ["C2", "D#2", "F2", "Ab2", "Ab3", "G3", "C4", "Bb3", "F3", "D4", "Eb4"];
 // var chords = [ ["C2", "F2", "Ab2", "C4"], ["Eb3", "G3", "Ab4", "G2"], ["F2", "Bb3", "F3", "D4"], ["G2", "Bb3", "C4", "Eb4"] ];
 
@@ -20,7 +20,7 @@ var chords = [["B1", "F#1", "F#2", "B2", "F#3", "B3", "D3", "A3", "D4", "E4", "A
 ["D1", "A2", "D2", "A3", "E3", "F#3", "G#3", "A3", "B3", "E4", "B4"], ["A2", "E2", "A3", "E3", "F#3", "G#3", "B3", "C#4", "E4", "B4"],
 ["C#2", "F#2", "C#3", "F#3", "G#3", "A3", "C#4", "A4", "C#5"], ["F#1", "C#2", "F#2", "C#3", "F#3", "G#3", "A3", "B3", "C#4", "F#4"],
 ["E1", "A1", "E2", "A2", "C#3", "F#3", "G#3", "A3", "B3", "E4", "G#4", "B4", "E5"], ["D1", "A1", "D2", "A2", "F#3", "G#3", "A3", "E4", "A4", "E5"]]
-var currentNotes = chords[0];
+var current_notes = chords[0];
 //cyan, green, lime, amber, deep orange, red, pink, purple, indigo, light blue 
 var color_schemes = 
 [
@@ -36,41 +36,40 @@ var color_schemes =
 [0x01579b, "0xe1f5fe", "0xb3e5fc", "0x81d4fa", "0x4fc3f7", "0x29b6f6", "0x00b0ff", "0x03a9f4", "0x0288d1"]
 ];
 var tick = 0,
-    smallestDimension = Math.min( window.innerWidth, window.innerHeight ),
-    viewportWidth = smallestDimension,
-    viewportHeight = smallestDimension,
+    smallest_dimension = Math.min( window.innerWidth, window.innerHeight ),
+    viewport_width = smallest_dimension,
+    viewport_height = smallest_dimension,
 
     //world width and world height might become object or card width, card height
-    worldWidth = 250,
-    worldHeight = 250,
-    tileWidth = 50,
-    tileHeight = 50,
+    world_width = 250,
+    world_height = 250,
+    tile_width = 50,
+    tile_height = 50,
     ran =64,
-    spotLight, ambientLight, plane,
+    spotLight, ambient_light, plane,
 
     FOV = 200;
+
 
 // mainGain.gain.exponentialRampToValueAtTime(.1, context.currentTime + 1);
 //     mainGain.gain.value = .1;
 
 
 
-function muteSound() {
+function mute_sound() {
     mute != mute;
     if (mute === true) {
-            document.getElementById("mute-button").innerHTML = "UN-MUTE";
+        document.getElementById("mute-button").innerHTML = "UN-MUTE";
     } else {
-            document.getElementById("mute-button").innerHTML = "MUTE";
+        document.getElementById("mute-button").innerHTML = "MUTE";
     }
     Tone.Master.mute = !Tone.Master.mute
 }
 
-var osc, reverb, feedbackDelay, feedbackDelay2, feedbackDelay3, wider, eq, synthEQ, specialSynth, specialSynth2, synth, polySynth, conga, congaPart, noise, autoFilter;
+var osc, reverb, feedbackDelay, feedbackDelay2, feedbackDelay3, wider, eq, synthEQ, synth, polySynth, conga, congaPart, noise, autoFilter;
 
 function start_tone_stuff(){
-	osc = "triangle";
-// spotLight.intensity = 1;
-	reverb = new Tone.Freeverb(.95).toMaster();
+reverb = new Tone.Freeverb(.95).toMaster();
 	reverb.dampening.value = 3000;
 	feedbackDelay = new Tone.FeedbackDelay("6n", .75).toMaster();
 	feedbackDelay3 = new Tone.FeedbackDelay("1n", 0.55).toMaster();
@@ -83,76 +82,6 @@ function start_tone_stuff(){
 
 	synthEQ = new Tone.EQ3(-10, -1, 3).connect(feedbackDelay);
 
-	specialSynth = new Tone.DuoSynth().connect(feedbackDelay3);
-	specialSynth.set({
-		vibratoAmount:0.75,
-		vibratoRate:.25,
-		harmonicity:1.95,
-		voice0:{
-			volume:-5,
-			portamento:.2,
-			oscillator:{
-				type:"sine"
-			},
-			filterEnvelope:{
-				attack:0,
-				decay:0,
-				sustain:1,
-				release:1.5
-			},
-			envelope:{
-				attack:1.5,
-				decay:0,
-				sustain:5,
-				release:5.5
-			}
-		},
-		voice1:{
-			volume:-10,
-			portamento:.75,
-			oscillator:{
-				type:"sine"
-			},
-			filterEnvelope:{
-				attack:0.5,
-				decay:0,
-				sustain:3,
-				release:3
-			},
-			envelope:{
-				attack:3.25,
-				decay:0,
-				sustain:5,
-				release:9.5
-			}
-		}
-	})
-	specialSynth.volume.value = -25;
-	specialSynth2 = new Tone.FMSynth().connect(feedbackDelay3);
-	specialSynth2.set({
-		harmonicity:1,
-		modulationIndex:1.5,
-		detune:.25,
-		oscillator:{
-			type:"sawtooth6"
-		},
-		envelope:{
-			attack:0.53,
-			decay:0.01,
-			sustain:1,
-			release:5.75,
-		},
-		modulation:{
-			type:"square"
-		},
-		modulationEnvelope:{
-			attack:0.5,
-			decay:0,
-			sustain:1,
-			release:5.5
-		}
-	})
-	specialSynth2.volume.value = -25;
 	synth = new Tone.FMSynth().connect(feedbackDelay);
 	synth.set({
 		harmonicity:3,
@@ -162,7 +91,7 @@ function start_tone_stuff(){
 			type:"sine"
 		},
 		envelope:{
-			attack:0.03,
+			attack:0.001,
 			decay:0.01,
 			sustain:1,
 			release:0.75,
@@ -192,8 +121,8 @@ function start_tone_stuff(){
 	polySynth.volume.value = -50;
 
 	var loop2 = new Tone.Loop(function(time){
-	    polySynth.triggerAttackRelease(currentNotes[Math.floor(Math.random() * (currentNotes.length - 5))], "3m");
-	}, beatLengths[Math.floor(Math.random() * beatLengths.length)]).start();
+	    polySynth.triggerAttackRelease(current_notes[Math.floor(Math.random() * (current_notes.length - 5))], "3m");
+	}, beat_lengths[Math.floor(Math.random() * beat_lengths.length)]).start();
 	conga = new Tone.MembraneSynth({
 	    "pitchDecay" : 0.008,
 	    "octaves" : 2,
@@ -203,10 +132,10 @@ function start_tone_stuff(){
 	        "sustain" : 0
 	    }
 	}).connect(feedbackDelay);
-	conga.volume.value = -100;
-	congaPart = new Tone.Sequence(function(time, pitch){
-	    conga.triggerAttack(pitch, time, Math.random()*0.5 + 0.5);
-	}, ["D1"], "2n").start(0);
+	// conga.volume.value = -100;
+	// congaPart = new Tone.Sequence(function(time, pitch){
+	//     conga.triggerAttack(pitch, time, Math.random()*0.5 + 0.5);
+	// }, ["D1"], "2n").start(0);
 
 	noise = new Tone.Noise("white").start();
 	noise.volume.value = -50;
@@ -222,14 +151,14 @@ function start_tone_stuff(){
 	//start the autofilter LFO
 	autoFilter.start()
 
-	Tone.Transport.start("+0.1");
+	Tone.Transport.start("+0.01");
 }
 
 
 function update_current_notes(xx) {
 	console.log(chords[xx]);
-	currentNotes = chords[xx];
-	currentColors = color_schemes[xx];
+	current_notes = chords[xx];
+	current_colors = color_schemes[xx];
 }
 
 function init() {
@@ -239,7 +168,7 @@ function init() {
     console.log("init called ");
     e.width = 16;
     e.height = 16;
-    camera = new THREE.OrthographicCamera( viewportWidth, viewportHeight, viewportWidth, viewportHeight, 1, 1000 );
+    camera = new THREE.OrthographicCamera( viewport_width, viewport_height, viewport_width, viewport_height, 1, 1000 );
     camera.left = window.innerWidth / - 2;
     camera.right = window.innerWidth / 2;
     camera.top = window.innerHeight / 2;
@@ -258,7 +187,7 @@ function init() {
     e = document.getElementById("canvas");
     //  document.getElementById("mute-button").addEventListener("click", function(e) {
         
-    //     muteSound();
+    //     mute_sound();
         
     // });
     var l = document.getElementById("info")
@@ -289,7 +218,7 @@ function init() {
         p.classList.toggle("hidden"),
         !1
     })
-    window.addEventListener("resize", onWindowResize, !1);
+    window.addEventListener("resize", on_window_resize, !1);
 
 //  else
 //      renderer = new THREE.CanvasRenderer(); 
@@ -307,9 +236,12 @@ function init() {
     composer.addPass(bloomPass);
     bloomPass.clear = true;
 
-    var effectFilm = new THREE.FilmPass(.5, .05, 128, false);
+    var effectFilm = new THREE.FilmPass(1, .05, 128, false);
     effectFilm.renderToScreen = true;
     composer.addPass(effectFilm);
+    //container = document.getElementById( 'container' );
+    //container.appendChild( renderer.domElement );
+
     // container = document.getElementById( 'container' );
     // container.appendChild( renderer.domElement );
     var mesh = new THREE.SphereGeometry(300,300,12);
@@ -321,10 +253,10 @@ function init() {
 	sphere.scale.y = 0.001;
 	sphere.scale.z = 0.001;
     spotLight = new THREE.DirectionalLight( 0x0066f0 ),
-    //ambientLight = new THREE.AmbientLight( 0x66f606 )
+    //ambient_light = new THREE.AmbientLight( 0x66f606 )
     cubes = new THREE.Object3D();
     // plane = new THREE.Mesh(
-    //     new THREE.PlaneBufferGeometry( worldWidth * 2, worldHeight * 2, 1 ),
+    //     new THREE.PlaneBufferGeometry( world_width * 2, world_height * 2, 1 ),
     //     new THREE.MeshBasicMaterial({
     //         color: 0x00ffff
     //     })
@@ -342,7 +274,7 @@ function init() {
     scene.add(sphere);
     scene.add( cubes );
     scene.add( spotLight );
-    //scene.add( ambientLight );
+    //scene.add( ambient_light );
 
     var ran = Math.floor(Math.random() * 50);
 
@@ -352,7 +284,7 @@ function init() {
 }
 
 function trigger_light(x, hasPitch, scale) {
-    var block_info = collectedBlocks[blockSeq][2][x];
+    var block_info = collected_blocks[blockSeq][2][x];
     update_transaction_display(block_info);
     
     var ran_cube = cubes.children[ (cubes.children.length - 1) -  x];
@@ -364,19 +296,19 @@ function trigger_light(x, hasPitch, scale) {
         tween1 = new TWEEN.Tween( ran_cube.material )
             .to( {opacity: 0 }, 12000 )
             .repeat( 0 )
-            .easing( createStepFunction(64) )
+            .easing( create_step_function(64) )
             .start()
     } else {
         ran_cube.material.opacity= .1;
         tween1 = new TWEEN.Tween( ran_cube.material )
             .to( {opacity: 0 }, 12000 )
             .repeat( 0 )
-            .easing(  createStepFunction(12)  )
+            .easing(  create_step_function(12)  )
             .start()
     }
 }
 
-function createStepFunction(numSteps) {
+function create_step_function(numSteps) {
 	return function(k) {
 		return (Math.floor(k * numSteps) / numSteps);
 	}
@@ -416,52 +348,53 @@ function interpret_amount_vel(val) {
 
 function interpret_hash(hash) {
     //notes = ["A3", "Bb3", "C4", "D4", "Eb4", "F4", "G4", "Ab4", "Bb4", "C5", "Eb5", "G5"]
-    num_hash = hash.replace(/\D/g,'');
-    num = mode(add(num_hash));
+    // num_hash = hash.replace(/\D/g,'');
+    // num = mode(add(num_hash));
+    num = Math.floor(Math.random() * notes.length)
     return notes[num]
 }
 
 function interpret_amount_note(val){
 	if (val < .25) {
-		return currentNotes[currentNotes.length - 1];
+		return current_notes[current_notes.length - 1];
 	} else if ((val >= .25) && (val < 1)) {
-		return currentNotes[currentNotes.length - 2];
+		return current_notes[current_notes.length - 2];
 	} else if ((val >= 1) && (val < 10)) {
-		return currentNotes[currentNotes.length - 3];
+		return current_notes[current_notes.length - 3];
 	} else if ((val >= 10) && (val < 100)) {
-		return currentNotes[currentNotes.length - 4];
+		return current_notes[current_notes.length - 4];
 	} else if ((val >= 100) && (val < 500)) {
-		return currentNotes[currentNotes.length - 5];
+		return current_notes[current_notes.length - 5];
 	} else if ((val >= 500) && (val < 1000)) {
-		return currentNotes[currentNotes.length - 6];
+		return current_notes[current_notes.length - 6];
 	}else if ((val >= 1000) && (val < 5000)) {
-		return currentNotes[currentNotes.length - 7];
+		return current_notes[current_notes.length - 7];
 	}else if ((val >= 5000) && (val < 10000)) {
-		return currentNotes[currentNotes.length - 8];
+		return current_notes[current_notes.length - 8];
 	}else if ((val >= 10000)) {
-		return currentNotes[currentNotes.length - 9];
+		return current_notes[current_notes.length - 9];
 	}
 }
 
 function interpret_cube_color(val){
 	if (val < .25) {
-		return currentColors[0];
+		return current_colors[0];
 	} else if ((val >= .25) && (val < 1)) {
-		return currentColors[1];
+		return current_colors[1];
 	} else if ((val >= 1) && (val < 10)) {
-		return currentColors[2];
+		return current_colors[2];
 	} else if ((val >= 10) && (val < 100)) {
-		return currentColors[3];
+		return current_colors[3];
 	} else if ((val >= 100) && (val < 500)) {
-		return currentColors[4];
+		return current_colors[4];
 	} else if ((val >= 500) && (val < 1000)) {
-		return currentColors[5];
+		return current_colors[5];
 	}else if ((val >= 1000) && (val < 5000)) {
-		return currentColors[6];
+		return current_colors[6];
 	}else if ((val >= 5000) && (val < 10000)) {
-		return currentColors[7];
+		return current_colors[7];
 	}else if ((val >= 10000)) {
-		return currentColors[8];
+		return current_colors[8];
 	}
 }
 
@@ -486,55 +419,60 @@ function write_to_dic(mel, beats, info, vel, scale) {
     arr.push(info);
     arr.push(vel);
     arr.push(scale);
-    collectedBlocks.push(arr);
+    collected_blocks.push(arr);
 }
 
-function define_content(transactions, empty) {
-    var newMelody = [];
-    var newBeats = [];
-    var newVelocity = [];
-    var newScale = [];
-    var transactionInfo = [];
-    if (transactions.length > 127) {
-        transactions.length = 127;
-    } 
-    if (empty) {
+function define_content() {
+    var new_melody = [];
+    var new_beats = [];
+    var new_velocity = [];
+    var new_scale = [];
+    var transaction_info = [];
+    var amount_of_transactions = Math.floor(Math.random() * 17)
+    // if (transactions.length > 127) {
+    //     transactions.length = 127;
+    // } 
+    if (0) {
     	var one_info = [];
-		one_info.push(this_tx.block_id);
-        one_info.push(this_tx.hash);
+		//one_info.push(this_tx.block_id);
+		one_info.push(Math.floor(Math.random() * 856000));
+        one_info.push("");
         one_info.push("Empty block...");
-        transactionInfo.push(one_info);
+        transaction_info.push(one_info);
     } else {
-    	for (var xx = 0; xx < transactions.length; xx++ ) {
+    	for (var xx = 0; xx < amount_of_transactions; xx++ ) {
 	        var one_info = [];
-	        this_tx = transactions[xx];
-	        if (this_tx.recipient == 0xE6B1471020BD32E1Ad024771Ba4bEc405bc917f8) {
-	        	Tone.Transport.scheduleOnce(trigger_special_notes, ("+1m"));
+	        //this_tx = transactions[xx];
+	        var amount;
+	        if (Math.random() < .15) {
+	        	amount = 0;
+	        } else {
+	        	amount = Math.random() * 6600;
 	        }
-	        var amount = this_tx.amount / 1000000000000000000;
-	        one_info.push(this_tx.block_id);
-	        one_info.push(this_tx.hash);
+ 	       // var amount = this_tx.amount / 1000000000000000000;
+	        one_info.push(block_num);
+	        one_info.push("");
 	        one_info.push("AMOUNT: " + amount.toFixed(4));
-	        transactionInfo.push(one_info);
+	        transaction_info.push(one_info);
 	        if (amount == 0) {
-	            newMelody.push('C7');
-	            newBeats.push("4n");
-	            newVelocity.push(0);
+	            new_melody.push('C7');
+	            new_beats.push("4n");
+	            new_velocity.push(0);
 	            //newMelody.push(["4n", null]);
 	        } else {
-	            newBeats.push(interpret_amount_beat(amount));
+	            new_beats.push(interpret_amount_beat(amount));
 	            //newMelody.push(interpret_hash(this_tx.hash));
-	            newMelody.push(interpret_amount_note(amount));
+	            new_melody.push(interpret_amount_note(amount));
 	            console.log(interpret_amount_note(amount) + " , " + amount);
-	            newVelocity.push(interpret_amount_vel(amount));
-	            newScale.push(interpret_amount_scale(amount));
+	            new_velocity.push(interpret_amount_vel(amount));
+	            new_scale.push(interpret_amount_scale(amount));
 	        }
     	}
     }
-    write_to_dic(newMelody, newBeats, transactionInfo, newVelocity, newScale);
+    write_to_dic(new_melody, new_beats, transaction_info, new_velocity, new_scale);
 }
 
-function createGrid(content) {
+function create_grid(content) {
 	var framedWidth = (window.innerWidth) * .9; //frame amount
     var transaxx = content[0].length;
     var fixedWidthOfOneUnit = framedWidth / transaxx;
@@ -553,7 +491,7 @@ function createGrid(content) {
         material.transparent = true;
         material.opacity = 0;
         var cube = new THREE.Mesh(geometry, material);
-        //cube.scale.y = worldHeight;
+        //cube.scale.y = world_height;
         cube.scale.z = 1;
         cube.position.x = the_floor - (fixedWidthOfOneUnit * x);
         cube.position.y = 0;
@@ -592,8 +530,8 @@ function render() {
     TWEEN.update();
 }
 
-function onWindowResize() {
 
+function on_window_resize() {
     camera.left = window.innerWidth / - 2;
     camera.right = window.innerWidth / 2;
     camera.top = window.innerHeight / 2;
@@ -606,116 +544,123 @@ function onWindowResize() {
 }
 
 function get_data() {
-    var url = "https://etherchain.org/api/blocks/count"
+    // var url = "https://etherchain.org/api/blocks/count"
 
-    var ajax = new XMLHttpRequest();
-    ajax.open("GET", url, true);
-    ajax.send(null);
-    ajax.onreadystatechange = function () {
+    // var ajax = new XMLHttpRequest();
+    // ajax.open("GET", url, true);
+    // ajax.send(null);
+    // ajax.onreadystatechange = function () {
 
-         if (ajax.readyState == 4 && (ajax.status == 200)) {          
-            var Data = JSON.parse(ajax.responseText);
+    //      if (ajax.readyState == 4 && (ajax.status == 200)) {          
+    //         var Data = JSON.parse(ajax.responseText);
             
-            curBlockID = Data.data[0].count
-            priorBlockID = curBlockID
-            lastBlockPlayed = curBlockID - 1;
-            get_first_block(curBlockID)
-        } else {
+    //         curBlockID = Data.data[0].count
+    //         prior_block_id = curBlockID
+    //         last_block_played = curBlockID - 1;
+    //         get_first_block(curBlockID)
+    //     } else {
 
-        }
-    }
+    //     }
+    // }
 }
 
-get_data();
+//get_data();
 
-function get_first_block(block_num) {
-    var url = "https://etherchain.org/api/block/" + block_num + "/tx"
-    var ajax =new XMLHttpRequest()
-    ajax.open("GET", url, true)
-    ajax.send(null)
-    ajax.onreadystatechange = function () {
-        if (ajax.readyState == 4 && (ajax.status == 200)) {    
-            var block = JSON.parse(ajax.responseText);
-            if (block.data.length == 0) {
-                get_first_block(block_num - 1);
-            } else {
-                define_content(block.data, false);
-                priorBlockID = block_num;
-                //priorBlockID = block_num
-            }
-        } else {        
-        }
-    }
+function get_first_block() {
+    // var url = "https://etherchain.org/api/block/" + block_num + "/tx"
+    // var ajax =new XMLHttpRequest()
+    // ajax.open("GET", url, true)
+    // ajax.send(null
+    block_num = Math.floor(Math.random() * 100000)
+    define_content();
+    prior_block_id = block_num;
+    // ajax.onreadystatechange = function () {
+    //     if (ajax.readyState == 4 && (ajax.status == 200)) {    
+    //         var block = JSON.parse(ajax.responseText);
+    //         if (block.data.length == 0) {
+    //             get_first_block(block_num - 1);
+    //         } else {
+    //             define_content(block.data, false);
+    //             prior_block_id = block_num;
+    //             //prior_block_id = block_num
+    //         }
+    //     } else {        
+    //     }
+    // }
 }
 
-function get_new_block(block_num) {
-	//console.log(block_num);
-    var url = "https://etherchain.org/api/block/" + block_num + "/tx"
-    var ajax =new XMLHttpRequest()
-    ajax.open("GET", url, true)
-    ajax.send(null)
-    ajax.onreadystatechange = function () {
-        if (ajax.readyState == 4 && (ajax.status == 200)) {
+get_first_block();
+
+function get_new_block() {
+	block_num++;
+	define_content();
+    prior_block_id = block_num;
+    // var url = "https://etherchain.org/api/block/" + block_num + "/tx"
+    // var ajax =new XMLHttpRequest()
+    // ajax.open("GET", url, true)
+    // // ajax.send(null)
+    // ajax.onreadystatechange = function () {
+    //     if (ajax.readyState == 4 && (ajax.status == 200)) {
                         
-            var block = JSON.parse(ajax.responseText);
-            if (block.data.length === 0) {
-                define_content(block.data, true);
-                //play empty block chord
-                //change color or something
-            } else {
-                define_content(block.data, false);
-                //priorBlockID = block_num
-            }
-        } else {         
-        }
-    }
+    //         var block = JSON.parse(ajax.responseText);
+    //         if (block.data.length === 0) {
+    //             define_content(block.data, true);
+    //             //play empty block chord
+    //             //change color or something
+    //         } else {
+    //             define_content(block.data, false);
+    //             //prior_block_id = block_num
+    //         }
+    //     } else {         
+    //     }
+    // }
 }
 
 function update_data() {
-    var url = "https://etherchain.org/api/blocks/count";
-    var ajax = new XMLHttpRequest();
-    ajax.open("GET", url, true);
-    ajax.send(null);
-    ajax.onreadystatechange = function () {
-         if (ajax.readyState == 4 && (ajax.status == 200)) {
-            var Data = JSON.parse(ajax.responseText);
-            curBlockID = Data.data[0].count;
-            if (curBlockID != priorBlockID) {
-            	for (var bb = (curBlockID-priorBlockID) - 1; bb > -1; bb-- ) {
-            		get_new_block(curBlockID - bb);	
-            	}
-				priorBlockID = curBlockID;
-                //fill new block with transaction
-            } 
-        } 
-    }
+	get_new_block();
+    // var url = "https://etherchain.org/api/blocks/count";
+    // var ajax = new XMLHttpRequest();
+    // ajax.open("GET", url, true);
+    // ajax.send(null);
+    // ajax.onreadystatechange = function () {
+    //      if (ajax.readyState == 4 && (ajax.status == 200)) {
+    //         var Data = JSON.parse(ajax.responseText);
+    //         curBlockID = Data.data[0].count;
+    //         if (curBlockID != prior_block_id) {
+    //         	for (var bb = (curBlockID-prior_block_id) - 1; bb > -1; bb-- ) {
+    //         		get_new_block(curBlockID - bb);	
+    //         	}
+				// prior_block_id = curBlockID;
+    //             //fill new block with transaction
+    //         } 
+    //     } 
+    // }
 }
 
 
 //setInterval(update_data(), delay)
 var blockSeq = 0;
 var xCount = 0;
-function scheduleNext(){
+function schedule_next(){
     //play note
     if (xCount == 0 ) {
-    	var col = new THREE.Color(currentColors[0]);
+    	var col = new THREE.Color(current_colors[0]);
     	renderer.setClearColor(col, .25);
     }
-	var n = collectedBlocks[blockSeq][0][xCount];
-	var b = collectedBlocks[blockSeq][1][xCount];
-	var v = collectedBlocks[blockSeq][3][xCount];
-	var s = collectedBlocks[blockSeq][4][xCount];
+	var n = collected_blocks[blockSeq][0][xCount];
+	var b = collected_blocks[blockSeq][1][xCount];
+	var v = collected_blocks[blockSeq][3][xCount];
+	var s = collected_blocks[blockSeq][4][xCount];
 	if (n !== "C7") {
 		console.log(n, b, v);
-		play_note(n,b,v);
-		trigger_light(xCount, true,s); 
+		play_note(n,b,v, s, xCount);
 	} else {
 		trigger_light(xCount, false, 1);
 	}
 	
-	if (xCount  < collectedBlocks[blockSeq][0].length-1) {
+	if (xCount  < collected_blocks[blockSeq][0].length-1) {
 		//schedule the next event relative to the current time by prefixing "+"
-		Tone.Transport.scheduleOnce(scheduleNext, ("+" + b));
+		Tone.Transport.scheduleOnce(schedule_next, ("+" + b));
 		xCount++;
 	} else {
 		blockSeq++;
@@ -724,7 +669,7 @@ function scheduleNext(){
 }
 
 var newN = -1;
-function countToTen() {
+function count_to_ten() {
 	newN++;
 	if (newN >= chords.length) {
 		newN = 0;
@@ -732,17 +677,16 @@ function countToTen() {
 }
 
 function check_for_new_content() {
-	if (collectedBlocks[blockSeq] !== undefined) {
-		if (collectedBlocks[blockSeq][0].length > 0) {
-			
-			countToTen();
+	if (collected_blocks[blockSeq] !== undefined) {
+		if (collected_blocks[blockSeq][0].length > 0) {			
+			count_to_ten();
 			update_current_notes(newN);
 			xCount = 0;
-			createGrid(collectedBlocks[blockSeq]);
+			create_grid(collected_blocks[blockSeq]);
 			
-			Tone.Transport.scheduleOnce(scheduleNext, ("+1m"));
+			Tone.Transport.scheduleOnce(schedule_next, ("+1m"));
 		} else {
-			update_transaction_display(collectedBlocks[blockSeq][2][0]);
+			update_transaction_display(collected_blocks[blockSeq][2][0]);
 			blockSeq++;	
 			Tone.Transport.scheduleOnce(check_for_new_content, ("+1m"));
 		}
@@ -751,36 +695,33 @@ function check_for_new_content() {
 	}
 }
 
-function play_note(n, b) {
-	var note = new Tone.Event(function(b, pitch){
-		synth.triggerAttackRelease(pitch, "4n", b, .5);
-	}, n).start();
+//const now = Tone.now()
+function play_note(n, b, v, s, x) {
+	var note = new Tone.Event(function(b, n){
+		synth.triggerAttackRelease(n, "4n", b, .5);
+		trigger_light(x, true,s); 
+	}, n).start(Tone.now());
 }
-
-function create_melody() {
-    interpret_hash(this_tx.hash);
-}
-
 
 
 setInterval(function() {
     update_data();
 }, 30000);
 
-var fade = false;
-setInterval(function(){
-	fade_drums();
-}, 120000);
+// var fade = false;
+// setInterval(function(){
+// 	fade_drums();
+// }, 120000);
 
 
-function fade_drums() {
-	if (fade) {
-		conga.volume.rampTo(-100, 4);
-    } else {
-    	conga.volume.rampTo(-20, 4);    
-    }
-    fade = !fade;
-}
+// function fade_drums() {
+// 	if (fade) {
+// 		conga.volume.rampTo(-100, 4);
+//     } else {
+//     	conga.volume.rampTo(-20, 4);    
+//     }
+//     fade = !fade;
+// }
 
 function update_transaction_display(block_info){
     document.getElementById("currentAmount").innerHTML = block_info[2];
@@ -801,12 +742,12 @@ var mode = function mode(arr) {
 };
 
 function add(string) {
-    string = string.split('');                 //split into individual characters
-    var nums = [];                               //have a storage ready
-    for (var i = 0; i < string.length; i++) {  //iterate through
-        nums[i] =  parseInt(string[i],10);         //convert from string to int
+    string = string.split('');             
+    var nums = [];                      
+    for (var i = 0; i < string.length; i++) {  
+        nums[i] =  parseInt(string[i],10);     
     }
-    return nums;                                //return when done
+    return nums;                             
 }
 
 function SetToZero() {
@@ -818,23 +759,23 @@ function SetToZero() {
 
 
 function trigger_special_notes () {
-	var specialNote = new Tone.Event(function(time, pitch){
-		specialSynth.triggerAttackRelease(pitch, "1m");
-	}, currentNotes[7]).start();
-	var specialNote2 = new Tone.Event(function(time, pitch) {
-		specialSynth2.triggerAttackRelease(pitch, "1m");
-	}, currentNotes[4]).start();
-	sphere.material.opacity = .5;
-	tween4 = new TWEEN.Tween( sphere.material )
-            .to( {opacity: 0 }, 12000 )
-            .repeat( 0 )
-            .easing( createStepFunction(64) )
-            .start()
-	sphere.material.color.setHex(specialColors[Math.floor(Math.random() * specialColors.length)]);
-    tween3 = new TWEEN.Tween( sphere.scale )
-    .to( {x: 5, y: 5 }, 9000 )
-    .repeat( 0 )
-    .onComplete(SetToZero)
-    .easing( createStepFunction(30) )
-    .start()
+	// var specialNote = new Tone.Event(function(time, pitch){
+	// 	specialSynth.triggerAttackRelease(pitch, "1m");
+	// }, current_notes[7]).start();
+	// var specialNote2 = new Tone.Event(function(time, pitch) {
+	// 	specialSynth2.triggerAttackRelease(pitch, "1m");
+	// }, current_notes[4]).start();
+	// sphere.material.opacity = .5;
+	// tween4 = new TWEEN.Tween( sphere.material )
+ //            .to( {opacity: 0 }, 12000 )
+ //            .repeat( 0 )
+ //            .easing( create_step_function(64) )
+ //            .start()
+	// sphere.material.color.setHex(special_colors[Math.floor(Math.random() * special_colors.length)]);
+ //    tween3 = new TWEEN.Tween( sphere.scale )
+ //    .to( {x: 5, y: 5 }, 9000 )
+ //    .repeat( 0 )
+ //    .onComplete(SetToZero)
+ //    .easing( create_step_function(30) )
+ //    .start()
 }
